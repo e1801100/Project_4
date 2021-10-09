@@ -32,6 +32,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+/* Task Stack Size */
+#define APP_TASK_START_STK_SIZE 128u
+/* Task Priority */
+#define APP_TASK_START_PRIO 1u
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,25 +47,94 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+/* Task Control Block */
+static OS_TCB AppTaskStartTCB;
+static OS_TCB LCDtaskTCB;
+/* Task Stack */
+static CPU_STK AppTaskStartStk[APP_TASK_START_STK_SIZE];
+static CPU_STK LCDtaskStk[APP_TASK_START_STK_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+static void AppTaskStart(void *p_arg);
+static void LCDtask(void *p_arg);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int main(void)
 {
-
+  /* To store error code */
   OS_ERR os_err;
 
+  /* Initialize uC/OS-III */
   OSInit(&os_err);
-  OSStart(&os_err);
 
+  if (os_err != OS_ERR_NONE)
+  {
+    while (DEF_TRUE)
+      ;
+  }
+
+  OSTaskCreate(
+      /* pointer to task control block */
+      (OS_TCB *)&AppTaskStartTCB,
+      /* task name can be displayed by debuggers */
+      (CPU_CHAR *)"App Task Start",
+      /* pointer to the task */
+      (OS_TASK_PTR)AppTaskStart,
+      /* pointer to an OPTIONAL data area */
+      (void *)0,
+      /* task priority: the lower the number, the higher the priority */
+      (OS_PRIO)APP_TASK_START_PRIO,
+      /* pointer to task's stack base addr */
+      (CPU_STK *)&AppTaskStartStk[0],
+      /* task's stack limit to monitor and ensure that the stack 
+       * doesn't overflow (10%) */
+      (CPU_STK_SIZE)APP_TASK_START_STK_SIZE / 10,
+      /* task's stack size */
+      (CPU_STK_SIZE)APP_TASK_START_STK_SIZE,
+      /* max number of message that the task can receive through 
+       * internal message queue (5) */
+      (OS_MSG_QTY)5u,
+      /* amount of clock ticks for the time quanta 
+       * when round robin is enabled */
+      (OS_TICK)0u,
+      /* pointer to an OPTIONAL user-supplied memory location 
+       * use as a TCB extension */
+      (void *)0,
+      /* contain task-specific option 
+       * OS_OPT_TASK_STK_CHK: allow stack checking 
+       * OS_OPT_TASK_STK_CLR: stack needs to be cleared */
+      (OS_OPT)(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+      /* pointer to a variable that will receive an error code */
+      (OS_ERR *)&os_err);
+  
+  OSTaskCreate(
+      (OS_TCB *)&LCDtaskTCB,
+      (CPU_CHAR *)"LCD Task",
+      (OS_TASK_PTR)LCDtask,
+      (void *)0,
+      (OS_PRIO)2,
+      (CPU_STK *)&LCDtaskStk[0],
+      (CPU_STK_SIZE)APP_TASK_START_STK_SIZE / 10,
+      (CPU_STK_SIZE)APP_TASK_START_STK_SIZE,
+      (OS_MSG_QTY)5u,
+      (OS_TICK)0u,
+      (void *)0,
+      (OS_OPT)(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+      (OS_ERR *)&os_err);
+
+  if (os_err != OS_ERR_NONE)
+  {
+    while (DEF_TRUE)
+      ;
+  }
+
+  /* Start Mulitasking */
+  OSStart(&os_err);
 }
 /* USER CODE END 0 */
 
@@ -97,7 +171,7 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK 
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
@@ -111,7 +185,45 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void AppTaskStart(void *p_arg)
+{
+  OS_ERR os_err;
 
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_USART1_UART_Init();
+
+  while (DEF_TRUE)
+  {
+    char frame[] = "toimiiko usart\n";
+		uartPrint(&huart1, frame);
+    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
+  }
+}
+
+static void LCDtask(void *p_arg)
+{
+  OS_ERR os_err;
+
+  LCD_Init();
+	LCD_Clear();
+	LCD_Set_Cursor(1, 1);
+	LCD_Write_String(" LCD Testi ");
+
+  while (DEF_TRUE)
+  {
+    LCD_SR(); DWT_Delay_ms(450);
+		LCD_SR(); DWT_Delay_ms(450);
+		LCD_SR(); DWT_Delay_ms(450);
+		LCD_SR(); DWT_Delay_ms(450);
+
+		LCD_SL(); DWT_Delay_ms(450);
+    LCD_SL(); DWT_Delay_ms(450);
+		LCD_SL(); DWT_Delay_ms(450);
+		LCD_SL(); DWT_Delay_ms(450);
+  }
+}
 /* USER CODE END 4 */
 
 /**

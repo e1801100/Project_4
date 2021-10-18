@@ -40,7 +40,7 @@ void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -183,10 +183,12 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 /* USER CODE BEGIN 1 */
 void uartPrint(UART_HandleTypeDef *huart, char _out[]){
+  OS_ERR os_err;
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
 	//GPIOA->ODR |= (1 << 6); //MAX3485 to transmit mode
 	HAL_UART_Transmit(huart, (uint8_t *)_out, strlen(_out), 32);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
+	OSTimeDlyHMSM(0, 0, 0, 3, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
 	//GPIOA->ODR &= ~(1 << 6); //MAX3485 to receive mode
 } 
 /* USER CODE END 1 */

@@ -29,8 +29,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l1xx_hal.h"
-#include "usart.h"
-#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -49,9 +47,10 @@ extern "C" {
 #include <os_cfg_app.h>
 #include <os.h>
 
-#include <LCD16x2.h>
-#include <DWT_Delay.h>
+#include "LCD16x2.h"
+#include "DWT_Delay.h"
 #include "string.h"
+#include "mb.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

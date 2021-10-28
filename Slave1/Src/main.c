@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -194,6 +195,7 @@ static void AppTaskStart(void *p_arg)
   SystemClock_Config();
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_I2C2_Init();
   //HAL_UART_MspInit(&huart1);
 
   //Modbus initialization

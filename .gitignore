@@ -51,4 +51,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+<<<<<<< HEAD
 Master_old/*
+=======
+Master1/
+>>>>>>> 3ce4f4215d038d69b9dfc5c6e7978e8c2f3a94cf

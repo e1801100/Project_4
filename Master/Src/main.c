@@ -36,7 +36,7 @@
 /* Task Stack Size */
 #define APP_TASK_START_STK_SIZE 128u
 /* Task Priority */
-#define APP_TASK_START_PRIO 1u
+#define APP_TASK_START_PRIO 5u
 
 /* USER CODE END PD */
 
@@ -197,47 +197,34 @@ static void AppTaskStart(void *p_arg)
   //HAL_UART_MspInit(&huart1);
 
   //Modbus initialization
-  MBInit();
-  /*MB_Init(1000);
-  MODBUS_CH *master_ch;
-  master_ch=MB_CfgCh(1,// ... Modbus Node # for this slave channel
-    MODBUS_MASTER,  // ... This is a MASTER
-    1000,           // ... One second timeout waiting for slave response
-    MODBUS_MODE_RTU,// ... Modbus Mode (_ASCII or _RTU)
-      1,            // ... Specify UART #1
-    9600,           // ... Baud Rate
-      8,            // ... Number of data bits 7 or 8
-    MODBUS_PARITY_NONE,// ... Parity: _NONE, _ODD or _EVEN
-      1,            // ... Number of stop bits 1 or 2
-    MODBUS_WR_EN);  // ... Enable (_EN) or disable (_DIS) writes
-  */
+  //MBInitSlave();
 
   int sensor_val;
-  char received_frame[8]={6,1,0,3,4,5,6,7};
-  uartPrint(&huart1, received_frame, 8);
+  char received_frame[8]={6,1,2,3,4,5,6,7};
+  char lcdstr[20];
+  //uartPrint(&huart1, received_frame);
   while (DEF_TRUE)
   {
-    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
-	  MBRun();
+    sensor_val=MBRequest(6,1);
+    LCD_Set_Cursor(2, 1);
+    sprintf(lcdstr, "sensor: %d", sensor_val);
+    LCD_Write_String(lcdstr);
+    
+    //OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	  //MBRun();
     //MBRespond(0);
-	  /*if(mbFlag == 1) {
-      if(MBReceive(&received_frame[0])) {
-        MBRespond(0);
-      }
-      mbFlag=0;
-			USART1->CR1|=(1<<5); //enable usart1 interrupt
+	  /*if(MBReceive(received_frame)) {
+      MBRespond(0);
     }*/
-	  //char *frame = "testi";
-	  //uartPrint(&huart1, frame);
-
-	  //MBM_FC04_InRegRd(master_ch, 1, 0, &sensor_val, 1);
-	  OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
+    
+	  OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
   }
 }
 
 static void LCDtask(void *p_arg)
 {
-  //OS_ERR os_err;
+  OS_ERR os_err;
+  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
   LCD_Init();
 	LCD_Clear();
@@ -246,16 +233,15 @@ static void LCDtask(void *p_arg)
 
   while (DEF_TRUE)
   {
-    LCD_SR(); DWT_Delay_ms(450);
-		LCD_SR(); DWT_Delay_ms(450);
-		LCD_SR(); DWT_Delay_ms(450);
-		LCD_SR(); DWT_Delay_ms(450);
+    LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
-		LCD_SL(); DWT_Delay_ms(450);
-    LCD_SL(); DWT_Delay_ms(450);
-		LCD_SL(); DWT_Delay_ms(450);
-		LCD_SL(); DWT_Delay_ms(450);
-    //MBRespond(1);
+		LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+    LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
   }
 }
 /* USER CODE END 4 */

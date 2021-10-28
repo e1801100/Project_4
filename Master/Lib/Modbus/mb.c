@@ -2,53 +2,67 @@
 //#include <mb.h>
 
 char mbFlag=0;
-uint8_t received_frame[8] = {6, 1, 0, 3, 4, 5, 6, 7};
+char received_frame[8] = {6, 1, 0, 3, 4, 5, 6, 7};
 
-void MBRun() {
-	/*for(int i=0; i<8; i++){
-		while(!(USART1->SR & 0x0020)){
-			OSTimeDlyHMSM(0, 0, 0, 1, OS_OPT_TIME_HMSM_STRICT, NULL);
-		} 		//if data available in DR register. p737
-		*(received_frame+i) = USART1->DR;
-	}*/
-	//MBReceive((char *)received_frame);
-	//uartPrint(&huart1, received_frame);
-	if (mbFlag == 1) {
-		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-	//if (MBReceive((char *)received_frame)) {
+int MBRequest(char slave, int address) {
+	char frame[8]={slave,4,0,0,0,1,0,0};
+	unsigned short int crc;
+	char response[7]={0};
+	int value=0;
 
-	//MBRespond(0);
-	//MBReceive((char *)received_frame));
-		//}
-		mbFlag = 0;
-		//USART1->CR1 |= (1 << 5); //enable usart1 interrupt
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+
+	frame[2]=address>>8; //address to frame
+	frame[3]=address;
+	
+	crc=CRC16(frame,6);
+	frame[7]=crc>>8; //crc to frame
+	frame[6]=crc;
+
+	uartPrint(&huart1, frame, 8);
+
+	HAL_UART_Receive(&huart1, (uint8_t *)response, 7, 1000);
+	if (response[0]==slave && response[1]==4 && response[2]==2) {
+		value=response[3]; //sensor value from frame
+		value=value<<8;
+		value|=response[4];
+	} else {
+		value = -1;
 	}
+	/*char lcdstr[20];
+	LCD_Set_Cursor(2, 2);
+    sprintf(lcdstr, "%d %d %d %d %d %d", response[0], response[1],
+		response[2], value, response[5],response[6]);
+    LCD_Write_String(lcdstr);*/
+
+	//USART1->CR1 |= (1 << 5); //enable usart1 interrupt
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	return value;
 }
 
-void MBInit() {
+void MBInitSlave() {
     //USART1->CR1 |= 0x0020;			//enable RX interrupt
     //NVIC_EnableIRQ(USART1_IRQn); 	//enable interrupt in NVIC
-	HAL_UART_Receive_IT(&huart1, received_frame, 8);
+	HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
 }
-char MBReceive(char *received_frame) {
+char MBReceive(char *frame) {
 	int i;
-	HAL_UART_Receive(&huart1, received_frame, 8, 1000);
-	/*if (USART1->SR & 0x0020) {
-		for (i = 1; i < 8; i++) {
-			while (!(USART1->SR & 0x0020)) {
-			} //if data available in DR register. p737
-			*(received_frame + i) = USART1->DR;
+
+	if (mbFlag == 1) {
+		for (i = 0; i < 8; i++) {
+			*(frame + i) = received_frame[i];
 		}
 
-		return 1;
-		//check_crc((char *)received_frame);
-	}*/
-	return check_crc((char *)received_frame);
+		mbFlag = 0;
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+		HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
+		return 1; //check_crc(received_frame);
+	}
+	return 0;
 }
 
 void MBRespond(int sensor_value) {
-	uint8_t frame[7]={6,4,2,0,0,0,0};
+	char frame[7]={6,4,2,0,0,0,0};
 	unsigned short int crc;
 
 	if(sensor_value==0){
@@ -63,40 +77,28 @@ void MBRespond(int sensor_value) {
 	frame[5]=crc>>8; //crc to frame
 	frame[6]=crc;
 
-	uartPrint(&huart1, frame, 8);
+	uartPrint(&huart1, frame, 7);
 }
 
-char check_crc(char *received_frame) {
+char check_crc(char *received_frame, int len) {
 	unsigned short int crc=0;
 
-	crc=*(received_frame+7); //crc from received frame to variable crc
+	crc=*(received_frame+(len-1)); //crc from received frame to variable crc
 	crc=crc<<8;
-	crc|=*(received_frame+6);
+	crc|=*(received_frame+(len-2));
 
-	if(crc==CRC16(received_frame,6)){
+	if(crc==CRC16(received_frame,len-2)){
 		return 1;
 	}else{
 		return 0;
 	}
 }
 
-void USART1_mbFlag(void)
-{
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-	//This bit is set by hardware when the content of the
-	//RDR shift register has been transferred to the USART_DR register.
-	if(USART1->SR & 0x0020) 		//if data available in DR register. p737
-	{
-		mbFlag=1;
-        USART1->CR1&=~(1<<5);
-	}
-}
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-    uartPrint(&huart1, received_frame, 8);
+    //uartPrint(&huart1, (char *)received_frame);
 	mbFlag = 1;
-	HAL_UART_Receive_IT(&huart1, received_frame, 8);
 }
 
 unsigned short int CRC16 (char *nData,unsigned short int wLength)

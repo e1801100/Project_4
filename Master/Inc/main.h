@@ -51,6 +51,8 @@ extern "C" {
 #include "DWT_Delay.h"
 #include "string.h"
 #include "mb.h"
+#include "gpio.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

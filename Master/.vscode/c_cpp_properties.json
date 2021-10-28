@@ -1,3 +1,8 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
 {
     "configurations": [
         {
@@ -5,6 +10,7 @@
             "includePath": [
                 "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Inc",
                 "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Src",
+                "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/Modbus",
                 "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/lcd",
                 "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/util",
                 "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/cfg",
@@ -17,7 +23,6 @@
                 "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/STM32L1xx_HAL_Driver/Inc",
                 "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/STM32L1xx_HAL_Driver/Src",
                 "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/bsp",
-                "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/uC-Modbus",
                 "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/BSP/Components/Common",
                 "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/BSP/Components/ili9325",
                 "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/BSP/Components/hx8347d",
@@ -51,6 +56,7 @@
                 "path": [
                     "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Inc",
                     "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Src",
+                    "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/Modbus",
                     "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/lcd",
                     "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/util",
                     "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/cfg",
@@ -63,7 +69,6 @@
                     "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/STM32L1xx_HAL_Driver/Inc",
                     "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/STM32L1xx_HAL_Driver/Src",
                     "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/bsp",
-                    "/home/ph42on/vamk/embeddedprogramming/Project_4/Master/Lib/uC-Modbus",
                     "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/BSP/Components/Common",
                     "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/BSP/Components/ili9325",
                     "/home/ph42on/.platformio/packages/framework-stm32cubel1/Drivers/BSP/Components/hx8347d",
@@ -94,7 +99,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=50201",
+                "PLATFORMIO=50202",
                 "STM32L152xE",
                 "USE_HAL_DRIVER",
                 "F_CPU=32000000L",

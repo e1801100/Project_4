@@ -1,0 +1,2 @@
+#define MB_OS_CFG_RX_TASK_STK_SIZE 128u
+#define MB_OS_CFG_RX_TASK_PRIO 5u

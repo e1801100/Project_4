@@ -42,7 +42,7 @@ void MX_USART1_UART_Init(void);
 void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void uartPrint(UART_HandleTypeDef *huart, char _out[]);
+void uartPrint(UART_HandleTypeDef *huart, uint8_t _out[], int len);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

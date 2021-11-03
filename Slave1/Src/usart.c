@@ -187,7 +187,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void uartPrint(UART_HandleTypeDef *huart, char _out[], int len){
+void uartWrite(UART_HandleTypeDef *huart, char _out[], int len){
   OS_ERR os_err;
   
   //MAX3485 to transmit mode

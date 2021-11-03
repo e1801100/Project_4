@@ -19,13 +19,12 @@ int MBRequest(char slave, int address) {
 	frame[7]=crc>>8; //crc to frame
 	frame[6]=crc;
 
-	uartPrint(&huart1, frame, 8);
+	uartWrite(&huart1, frame, 8);
 
 	HAL_UART_Receive(&huart1, (uint8_t *)response, 7, 1000);
 	if (response[0]==slave && response[1]==4 && response[2]==2) {
-		value=response[3]; //sensor value from frame
-		value=value<<8;
-		value|=response[4];
+		//sensor value from response
+		value = (response[3] << 8) | response[4];
 	} else {
 		value = -1;
 	}
@@ -45,12 +44,13 @@ void MBInitSlave() {
     //NVIC_EnableIRQ(USART1_IRQn); 	//enable interrupt in NVIC
 	HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
 }
-char MBReceive(char *frame) {
-	int i;
+char MBReceive(char slave, char *type, int *address, int *data) {
 
-	if (mbFlag == 1) {
-		for (i = 0; i < 8; i++) {
-			*(frame + i) = received_frame[i];
+	if (mbFlag == 1){
+		if(slave==received_frame[0]) {
+		*type = received_frame[1];
+		*address = (received_frame[2] << 8) | received_frame[3];
+		*data = (received_frame[4] << 8) | received_frame[5];
 		}
 
 		mbFlag = 0;
@@ -65,19 +65,21 @@ void MBRespond(int sensor_value) {
 	char frame[7]={6,4,2,0,0,0,0};
 	unsigned short int crc;
 
-	if(sensor_value==0){
+	/*if(sensor_value==0){
 		frame[3]=0;
 		frame[4]=0;
 	} else {
 		frame[3]=0xFF;
 		frame[4]=0xFF;
-	}
+	}*/
+	frame[3] = 0; //sensor_value>>8; //sensor value to frame
+	frame[4]=sensor_value;
 
 	crc=CRC16(frame,5);
 	frame[5]=crc>>8; //crc to frame
 	frame[6]=crc;
 
-	uartPrint(&huart1, frame, 7);
+	uartWrite(&huart1, frame, 7);
 }
 
 char check_crc(char *received_frame, int len) {

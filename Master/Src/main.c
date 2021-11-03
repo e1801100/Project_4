@@ -210,14 +210,9 @@ static void AppTaskStart(void *p_arg)
     sprintf(lcdstr, "sensor: %d", sensor_val);
     LCD_Write_String(lcdstr);
     
-    //OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
-	  //MBRun();
-    //MBRespond(0);
-	  /*if(MBReceive(received_frame)) {
-      MBRespond(0);
-    }*/
+    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
     
-	  OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	  //OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
   }
 }
 

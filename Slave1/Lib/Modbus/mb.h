@@ -3,7 +3,7 @@
 
 int MBRequest(char slave, int address);
 void MBInitSlave();
-char MBReceive(char *frame);
+char MBReceive(char slave, char *type, int *address, int *data);
 void MBRespond(int sensor_value);
 char check_crc(char *frame, int len);
 void USART1_mbFlag(void);

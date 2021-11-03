@@ -19,8 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "i2c.h"
-#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -195,22 +193,29 @@ static void AppTaskStart(void *p_arg)
   SystemClock_Config();
   MX_GPIO_Init();
   MX_USART1_UART_Init();
-  //HAL_UART_MspInit(&huart1);
 
   //Modbus initialization
   MBInitSlave();
 
-  int sensor_val;
-  char received_frame[8]={6,1,2,3,4,5,6,7};
+  BME280_Init();
+
+  bme280_t bme280Data;
+  char send[20];
+  char type;
+  int address, data;
   //uartPrint(&huart1, received_frame);
-  while (DEF_TRUE)
-  {
-    //MBRespond(0);
-	  if(MBReceive(received_frame)) {
-      MBRespond(1);
-    }
-    
-	  OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
+  while (DEF_TRUE) {
+	  //MBRespond(0);
+    BME280_GetData(&bme280Data);
+	  if (MBReceive(6, &type, &address, &data)) {
+		  if (type == 4 && address == 1 && data == 1) {
+			  //MBRespond(bme280Data.temperature);
+			  sprintf(send, "Temp: %d \nhum: %d", bme280Data.temperature, bme280Data.humidity);
+			  uartWrite(&huart1, send, 20);
+		  }
+	  }
+
+	  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
   }
 }
 

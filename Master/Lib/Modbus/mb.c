@@ -23,9 +23,8 @@ int MBRequest(char slave, int address) {
 
 	HAL_UART_Receive(&huart1, (uint8_t *)response, 7, 1000);
 	if (response[0]==slave && response[1]==4 && response[2]==2) {
-		value=response[3]; //sensor value from frame
-		value=value<<8;
-		value|=response[4];
+		//sensor value from frame
+		value = (response[3] << 8) | response[4];
 	} else {
 		value = -1;
 	}
@@ -45,13 +44,12 @@ void MBInitSlave() {
     //NVIC_EnableIRQ(USART1_IRQn); 	//enable interrupt in NVIC
 	HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
 }
-char MBReceive(char *frame) {
-	int i;
+char MBReceive(char slave, char *type, int *address, int *data) {
 
-	if (mbFlag == 1) {
-		for (i = 0; i < 8; i++) {
-			*(frame + i) = received_frame[i];
-		}
+	if (mbFlag == 1 && slave==received_frame[0]) {
+		*type = received_frame[1];
+		*address = (received_frame[2] << 8) | received_frame[3];
+		*data = (received_frame[4] << 8) | received_frame[5];
 
 		mbFlag = 0;
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);

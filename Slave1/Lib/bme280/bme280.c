@@ -1,4 +1,3 @@
-#include "stm32f10x.h"                  // Device header
 #include <stdbool.h>
 #include "i2c.h"
 #include "gpio.h"
@@ -92,7 +91,7 @@ static void BME280_Store_Compensation_Parameters(uint8_t* calibReg1,
 */
 void BME280_Init(void)
 {
-	GPIO_OutputInit(GPIOB,
+	/*GPIO_OutputInit(GPIOB,
 									GPIO_PORT_REG_LOW,
 								 (GPIO_PIN6_OUTPUT_MODE_2MHZ | GPIO_PIN7_OUTPUT_MODE_2MHZ),
 								 (GPIO_PIN6_ALT_FUNC_OPEN_DRAIN | GPIO_PIN7_ALT_FUNC_OPEN_DRAIN));
@@ -101,10 +100,14 @@ void BME280_Init(void)
 					 I2C_PERIPH_FREQ_8MHZ,
 					 I2C_STANDARD_MODE_8MHZ_CCR, 
 					 I2C_STANDARD_MODE_8MHZ_TRISE);
-	
-	I2C_ReadMultiByte(I2C1,BME280_ADDR, CALIB_00_25_ADDR, bme280Calib00_25, CALIB_00_25_SIZE);
+	*/
+	MX_I2C2_Init();
+
+	//I2C_ReadMultiByte(I2C1,BME280_ADDR, CALIB_00_25_ADDR, bme280Calib00_25, CALIB_00_25_SIZE);
+	HAL_I2C_Mem_Read(&hi2c2, BME280_ADDR, CALIB_00_25_ADDR, CALIB_00_25_SIZE, bme280Calib00_25, CALIB_00_25_SIZE, 1000);
 	//read the first 7 calibration data of calib26_41 register of bme280
-	I2C_ReadMultiByte(I2C1,BME280_ADDR, CALIB_26_41_ADDR, bme280Calib26_41,7);
+	HAL_I2C_Mem_Read(&hi2c2, BME280_ADDR, CALIB_26_41_ADDR, CALIB_26_41_SIZE, bme280Calib26_41, 7, 1000);
+	//I2C_ReadMultiByte(I2C1,BME280_ADDR, CALIB_26_41_ADDR, bme280Calib26_41,7);
 	BME280_Store_Compensation_Parameters(bme280Calib00_25,bme280Calib26_41,&bme280);
 }
 
@@ -122,9 +125,14 @@ The actual humidity = sensor reading / 1024 (see Bosch Sensortec BME280 datashee
 */
 void BME280_GetData(bme280_t* pSensorData)
 {
-	I2C_WriteByte(I2C1,BME280_ADDR, CTRL_HUM_ADDR, CTRL_HUM_OSRS_H_OVR16);
-	I2C_WriteByte(I2C1,BME280_ADDR, CTRL_MEAS_ADDR, (CTRL_MEAS_OSRS_T_OVR16 | CTRL_MEAS_MODE_FORCED1));
-	I2C_ReadMultiByte(I2C1,BME280_ADDR, DATA_REG_ADDR, rawAdcValue, ADC_REGISTER_SIZE);
+	HAL_I2C_Mem_Write(&hi2c2, BME280_ADDR, CTRL_HUM_ADDR, ADC_REGISTER_SIZE,
+		(uint8_t *)CTRL_HUM_OSRS_H_OVR16, 1, 1000);
+	//I2C_WriteByte(I2C1,BME280_ADDR, CTRL_HUM_ADDR, CTRL_HUM_OSRS_H_OVR16);
+	HAL_I2C_Mem_Write(&hi2c2, BME280_ADDR, CTRL_MEAS_ADDR, ADC_REGISTER_SIZE,
+		(uint8_t *)(CTRL_MEAS_OSRS_T_OVR16 | CTRL_MEAS_MODE_FORCED1), 1, 1000);
+	//I2C_WriteByte(I2C1,BME280_ADDR, CTRL_MEAS_ADDR, (CTRL_MEAS_OSRS_T_OVR16 | CTRL_MEAS_MODE_FORCED1));
+	HAL_I2C_Mem_Read(&hi2c2, BME280_ADDR, DATA_REG_ADDR, ADC_REGISTER_SIZE, rawAdcValue, ADC_REGISTER_SIZE, 1000);
+	//I2C_ReadMultiByte(I2C1,BME280_ADDR, DATA_REG_ADDR, rawAdcValue, ADC_REGISTER_SIZE);
 	
 	//The calculations below are based on equations from the.....
 	//Bosch Sensortec BME280 datasheet.

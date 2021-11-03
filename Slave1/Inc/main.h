@@ -49,10 +49,11 @@ extern "C" {
 
 #include "LCD16x2.h"
 #include "DWT_Delay.h"
-#include "string.h"
 #include "mb.h"
 #include "gpio.h"
 #include "usart.h"
+#include "i2c.h"
+#include "bme280.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

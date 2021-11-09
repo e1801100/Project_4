@@ -231,12 +231,12 @@ static void LCDtask(void *p_arg)
     LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 		LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 		LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
-		LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		//LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
 		LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
     LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 		LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
-		LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		//LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
   }
 }
 /* USER CODE END 4 */

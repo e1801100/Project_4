@@ -5,6 +5,7 @@ typedef struct
 {
 	uint8_t temperature;
 	uint8_t humidity;
+	uint8_t rawAdcValue[8];
 }bme280_t;
 
 //Initializes the BME280 humidity and temperature sensor

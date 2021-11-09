@@ -104,9 +104,9 @@ void BME280_Init(void)
 	MX_I2C2_Init();
 
 	//I2C_ReadMultiByte(I2C1,BME280_ADDR, CALIB_00_25_ADDR, bme280Calib00_25, CALIB_00_25_SIZE);
-	HAL_I2C_Mem_Read(&hi2c2, BME280_ADDR, CALIB_00_25_ADDR, CALIB_00_25_SIZE, bme280Calib00_25, CALIB_00_25_SIZE, 1000);
+	HAL_I2C_Mem_Read(&hi2c2, BME280_ADDR, CALIB_00_25_ADDR, ADC_REGISTER_SIZE, bme280Calib00_25, CALIB_00_25_SIZE, 1000);
 	//read the first 7 calibration data of calib26_41 register of bme280
-	HAL_I2C_Mem_Read(&hi2c2, BME280_ADDR, CALIB_26_41_ADDR, CALIB_26_41_SIZE, bme280Calib26_41, 7, 1000);
+	HAL_I2C_Mem_Read(&hi2c2, BME280_ADDR, CALIB_26_41_ADDR, ADC_REGISTER_SIZE, bme280Calib26_41, CALIB_26_41_SIZE, 1000);
 	//I2C_ReadMultiByte(I2C1,BME280_ADDR, CALIB_26_41_ADDR, bme280Calib26_41,7);
 	BME280_Store_Compensation_Parameters(bme280Calib00_25,bme280Calib26_41,&bme280);
 }
@@ -134,6 +134,9 @@ void BME280_GetData(bme280_t* pSensorData)
 	HAL_I2C_Mem_Read(&hi2c2, BME280_ADDR, DATA_REG_ADDR, ADC_REGISTER_SIZE, rawAdcValue, ADC_REGISTER_SIZE, 1000);
 	//I2C_ReadMultiByte(I2C1,BME280_ADDR, DATA_REG_ADDR, rawAdcValue, ADC_REGISTER_SIZE);
 	
+	for(int i=0; i<8; i++) {
+		pSensorData->rawAdcValue[i]=rawAdcValue[i];
+	}
 	//The calculations below are based on equations from the.....
 	//Bosch Sensortec BME280 datasheet.
 	

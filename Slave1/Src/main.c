@@ -200,7 +200,7 @@ static void AppTaskStart(void *p_arg)
   BME280_Init();
 
   bme280_t bme280Data;
-  char send[20];
+  //char send[20];
   char type;
   int address, data;
   //uartPrint(&huart1, received_frame);
@@ -209,9 +209,9 @@ static void AppTaskStart(void *p_arg)
     BME280_GetData(&bme280Data);
 	  if (MBReceive(6, &type, &address, &data)) {
 		  if (type == 4 && address == 1 && data == 1) {
-			  //MBRespond(bme280Data.temperature);
-			  sprintf(send, "Temp: %d \nhum: %d", bme280Data.temperature, bme280Data.humidity);
-			  uartWrite(&huart1, send, 20);
+			  MBRespond(6, bme280Data.temperature);
+			  //sprintf(send, "Temp: %d \nhum: %d", bme280Data.temperature, bme280Data.humidity);
+			  //uartWrite(&huart1, send, 20);
 		  }
 	  }
 

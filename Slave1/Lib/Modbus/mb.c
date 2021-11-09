@@ -54,15 +54,15 @@ char MBReceive(char slave, char *type, int *address, int *data) {
 		}
 
 		mbFlag = 0;
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 		HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
 		return 1; //check_crc(received_frame);
 	}
 	return 0;
 }
 
-void MBRespond(int sensor_value) {
-	char frame[7]={6,4,2,0,0,0,0};
+void MBRespond(char slave, int sensor_value) {
+	char frame[7]={slave,4,2,0,0,0,0};
 	unsigned short int crc;
 
 	/*if(sensor_value==0){
@@ -80,6 +80,7 @@ void MBRespond(int sensor_value) {
 	frame[6]=crc;
 
 	uartWrite(&huart1, frame, 7);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 }
 
 char check_crc(char *received_frame, int len) {

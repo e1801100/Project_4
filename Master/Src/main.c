@@ -199,15 +199,20 @@ static void AppTaskStart(void *p_arg)
   //Modbus initialization
   //MBInitSlave();
 
-  int sensor_val;
-  char received_frame[8]={6,1,2,3,4,5,6,7};
+  int temp, hum;
+  //char received_frame[8]={6,1,2,3,4,5,6,7};
   char lcdstr[20];
   //uartPrint(&huart1, received_frame);
   while (DEF_TRUE)
   {
-    sensor_val=MBRequest(1,1);
+    temp=MBRequest(1,1);
+    LCD_Set_Cursor(1, 1);
+    sprintf(lcdstr, "Temperature: %dC ", temp);
+    LCD_Write_String(lcdstr);
+    
+    hum=MBRequest(1,2);
     LCD_Set_Cursor(2, 1);
-    sprintf(lcdstr, "sensor: %d", sensor_val);
+    sprintf(lcdstr, "Humidity: %d%% ", hum);
     LCD_Write_String(lcdstr);
     
     OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
@@ -228,7 +233,7 @@ static void LCDtask(void *p_arg)
 
   while (DEF_TRUE)
   {
-    LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+    /*LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 		LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 		LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 		//LCD_SR(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
@@ -236,7 +241,7 @@ static void LCDtask(void *p_arg)
 		LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
     LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
 		LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
-		//LCD_SL(); OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		//LCD_SL();*/ OSTimeDlyHMSM(0, 0, 0, 450, OS_OPT_TIME_HMSM_STRICT, &os_err);
   }
 }
 /* USER CODE END 4 */

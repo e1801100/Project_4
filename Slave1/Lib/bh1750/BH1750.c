@@ -43,7 +43,7 @@ HAL_StatusTypeDef BH1750_init_i2c(I2C_HandleTypeDef* i2c_handle)
 {
 	  __HAL_RCC_GPIOB_CLK_ENABLE();
 
-	i2c_handle->Instance = I2C1;
+	i2c_handle->Instance = I2C2;
 	i2c_handle->Init.ClockSpeed = 100000;
 	i2c_handle->Init.DutyCycle = I2C_DUTYCYCLE_2;
 	i2c_handle->Init.OwnAddress1 = 0;

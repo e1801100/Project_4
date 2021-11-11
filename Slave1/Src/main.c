@@ -193,29 +193,32 @@ static void AppTaskStart(void *p_arg)
   SystemClock_Config();
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_I2C2_Init();
 
   //Modbus initialization
   MBInitSlave();
 
-  //BME280_Init();
-  //bme280_t bme280Data;
   struct bme280_dev dev;
   bme280_start(&dev);
 
   //char send[20];
+  /*BH1750_init_i2c(&hi2c2);
+  BH1750_device_t* test_dev = BH1750_init_dev_struct(&hi2c2, "test device", true);
+  BH1750_init_dev(test_dev);*/
   char type;
   int address, data;
   float temp, hum;
   //uartPrint(&huart1, received_frame);
   while (DEF_TRUE) {
-	  //MBRespond(0);
-    //BME280_GetData(&bme280Data);
 	  bme280_read(&temp, &hum, &dev);
+    //test_dev->poll(test_dev);
 	  if (MBReceive(1, &type, &address, &data)) {
-		  if (type == 4 && address == 1 && data == 1) {
-			  MBRespond(1, (int)temp);
-			  //sprintf(send, "Temp: %d \nhum: %d", bme280Data.temperature, bme280Data.humidity);
-			  //uartWrite(&huart1, send, 20);
+		  if (type == 4) {
+			  if (address == 1 && data == 1) {
+				  MBRespond(1, (int)temp); //send temperature
+			  } else if (address == 2 && data == 1) {
+				  MBRespond(1, (int)hum); //send humidity
+			  }
 		  }
 	  }
 

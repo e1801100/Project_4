@@ -41,12 +41,12 @@ int MBRequest(char slave, int address) {
 	} else {
 		value = -1;
 	}
-	
+	/*
 	char lcdstr[20];
 	LCD_Set_Cursor(1, 1);
     sprintf(lcdstr, "%d %d %d %d %d %d", response[0], response[1],
 		response[2], value, response[5],response[6]);
-    LCD_Write_String(lcdstr);
+    LCD_Write_String(lcdstr);*/
 	
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 	return value;

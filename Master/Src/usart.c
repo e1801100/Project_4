@@ -32,7 +32,7 @@ void MX_USART1_UART_Init(void)
 {
 
   /* USER CODE BEGIN USART1_Init 0 */
-
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
   /* USER CODE END USART1_Init 0 */
 
   /* USER CODE BEGIN USART1_Init 1 */
@@ -51,7 +51,7 @@ void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
+  
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -115,15 +115,15 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void uartPrint(UART_HandleTypeDef *huart, char _out[], int len){
+void uartWrite(UART_HandleTypeDef *huart, char _out[], int len){
   OS_ERR os_err;
   
   //MAX3485 to transmit mode
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
   //GPIOA->ODR |= (1 << 6);
-  OSTimeDlyHMSM(0, 0, 0, 1, OS_OPT_TIME_HMSM_STRICT, &os_err);
-  HAL_UART_Transmit(huart, (uint8_t *)_out, len, 32);
   OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
+  HAL_UART_Transmit(huart, (uint8_t *)_out, len, 32);
+  OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
   //MAX3485 to receive mode
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);

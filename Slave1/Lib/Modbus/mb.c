@@ -45,6 +45,9 @@ void MBInitSlave() {
 	HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
 }
 char MBReceive(char slave, char *type, int *address, int *data) {
+	int rx;
+	static int i = 0;
+	//rx = 1;
 
 	if (mbFlag == 1){
 		if(slave==received_frame[0]) {
@@ -54,10 +57,22 @@ char MBReceive(char slave, char *type, int *address, int *data) {
 		}
 
 		mbFlag = 0;
-		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-		HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+		HAL_UART_Abort_IT(&huart1);
+		rx = huart1.Instance->DR; //clear receive buffer
+		huart1.RxState = HAL_UART_STATE_READY;
+		HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
+		i = 0;
 		return 1; //check_crc(received_frame);
 	}
+	if(i>=15) { //if 15 loops = about 1.5 seconds
+		HAL_UART_Abort_IT(&huart1);
+		rx = huart1.Instance->DR;
+		huart1.RxState = HAL_UART_STATE_READY;
+		HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
+		i = 0;
+	}
+	i++;
 	return 0;
 }
 
@@ -65,6 +80,7 @@ void MBRespond(char slave, int sensor_value) {
 	char frame[7]={slave,4,2,0,0,0,0};
 	unsigned short int crc;
 
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 	/*if(sensor_value==0){
 		frame[3]=0;
 		frame[4]=0;

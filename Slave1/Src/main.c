@@ -197,25 +197,30 @@ static void AppTaskStart(void *p_arg)
   //Modbus initialization
   MBInitSlave();
 
-  BME280_Init();
+  //BME280_Init();
+  //bme280_t bme280Data;
+  struct bme280_dev dev;
+  bme280_start(&dev);
 
-  bme280_t bme280Data;
   //char send[20];
   char type;
   int address, data;
+  float temp, hum;
   //uartPrint(&huart1, received_frame);
   while (DEF_TRUE) {
 	  //MBRespond(0);
-    BME280_GetData(&bme280Data);
-	  if (MBReceive(6, &type, &address, &data)) {
+    //BME280_GetData(&bme280Data);
+	  bme280_read(&temp, &hum, &dev);
+	  if (MBReceive(1, &type, &address, &data)) {
 		  if (type == 4 && address == 1 && data == 1) {
-			  MBRespond(6, bme280Data.temperature);
+			  MBRespond(1, (int)temp);
 			  //sprintf(send, "Temp: %d \nhum: %d", bme280Data.temperature, bme280Data.humidity);
 			  //uartWrite(&huart1, send, 20);
 		  }
 	  }
 
 	  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
+
   }
 }
 

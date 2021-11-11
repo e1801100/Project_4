@@ -20,14 +20,17 @@ int MBRequest(char slave, int address) {
 	frame[7]=crc>>8; //crc to frame
 	frame[6]=crc;
 
-	uartPrint(&huart1, frame, 8);
+	uartWrite(&huart1, frame, 8);
 
 	OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)response, 7);
 	for (i = 0; i < 100; i++) {
 		if(mbFlag==1) {
 			i = 100;
-		} else if(i==99) {
+			mbFlag = 0;
+		} else if (i == 99) {
+			HAL_UART_Abort_IT(&huart1);
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 			return -1;
 		}
 		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
@@ -38,16 +41,13 @@ int MBRequest(char slave, int address) {
 	} else {
 		value = -1;
 	}
-	if(USART1->SR & 0x0020){
-		c=USART1->DR;
-	}
+	
 	char lcdstr[20];
 	LCD_Set_Cursor(1, 1);
     sprintf(lcdstr, "%d %d %d %d %d %d", response[0], response[1],
 		response[2], value, response[5],response[6]);
     LCD_Write_String(lcdstr);
-
-	//USART1->CR1 |= (1 << 5); //enable usart1 interrupt
+	
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 	return value;
 }
@@ -88,7 +88,7 @@ void MBRespond(int sensor_value) {
 	frame[5]=crc>>8; //crc to frame
 	frame[6]=crc;
 
-	uartPrint(&huart1, frame, 7);
+	uartWrite(&huart1, frame, 7);
 }
 
 char check_crc(char *received_frame, int len) {

@@ -205,7 +205,7 @@ static void AppTaskStart(void *p_arg)
   //uartPrint(&huart1, received_frame);
   while (DEF_TRUE)
   {
-    sensor_val=MBRequest(6,1);
+    sensor_val=MBRequest(1,1);
     LCD_Set_Cursor(2, 1);
     sprintf(lcdstr, "sensor: %d", sensor_val);
     LCD_Write_String(lcdstr);

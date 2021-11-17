@@ -209,6 +209,8 @@ static void AppTaskStart(void *p_arg)
     LCD_Set_Cursor(1, 1);
     sprintf(lcdstr, "Temperature: %dC ", temp);
     LCD_Write_String(lcdstr);
+
+    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
     
     hum=MBRequest(1,2);
     LCD_Set_Cursor(2, 1);

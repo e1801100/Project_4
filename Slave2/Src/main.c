@@ -197,38 +197,30 @@ static void AppTaskStart(void *p_arg)
   //HAL_UART_MspInit(&huart1);
 
   //Modbus initialization
-  //MBInitSlave();
+  MBInitSlave();
 
-  int data, temp=1, hum=2;
+  //int temp, hum;
   //char received_frame[8]={6,1,2,3,4,5,6,7};
   char lcdstr[20];
-  //uartPrint(&huart1, received_frame);
+  char type;
+  int address, data;
   while (DEF_TRUE)
   {
-	  data=MBRequest(1,1);
-    //if(data!=-1)
-    temp=data;
-    LCD_Set_Cursor(1, 1);
-    sprintf(lcdstr, "Temperature: %dC ", temp);
-    LCD_Write_String(lcdstr);
+	  if (MBReceive(2, &type, &address, &data)) {
+		  if (type == 6) {
+			  if (address == 1) {
+				  LCD_Set_Cursor(1, 1);
+				  sprintf(lcdstr, "Temperature: %dC ", data);
+				  LCD_Write_String(lcdstr);
+			  } else if (address == 2) {
+				  LCD_Set_Cursor(2, 1);
+				  sprintf(lcdstr, "Humidity: %d%% ", data);
+				  LCD_Write_String(lcdstr);
+			  }
+		  }
+	  }
 
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &os_err);
-    
-    data=MBRequest(1,2);
-    //if(data!=-1)
-    hum=data;
-    LCD_Set_Cursor(2, 1);
-    sprintf(lcdstr, "Humidity: %d%% ", hum);
-    LCD_Write_String(lcdstr);
-    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
-
-    MBSend(2, 1, temp);
-    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
-    MBSend(2, 2, hum);
-
-	  OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
-
-	  //OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
   }
 }
 

@@ -192,14 +192,14 @@ void uartWrite(UART_HandleTypeDef *huart, char _out[], int len){
   
   //MAX3485 to transmit mode
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
-  //GPIOA->ODR |= (1 << 6);
+  
   OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
   HAL_UART_Transmit(huart, (uint8_t *)_out, len, 32);
   OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
   //MAX3485 to receive mode
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
-  //GPIOA->ODR &= ~(1 << 6);
+  
 } 
 /* USER CODE END 1 */
 

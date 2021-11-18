@@ -53,42 +53,78 @@ int MBRequest(char slave, int address) {
 }
 
 void MBInitSlave() {
-    //USART1->CR1 |= 0x0020;			//enable RX interrupt
-    //NVIC_EnableIRQ(USART1_IRQn); 	//enable interrupt in NVIC
 	HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
 }
 char MBReceive(char slave, char *type, int *address, int *data) {
+	int rx;
+	static int i = 0;
 
-	if (mbFlag == 1 && slave==received_frame[0]) {
-		*type = received_frame[1];
-		*address = (received_frame[2] << 8) | received_frame[3];
-		*data = (received_frame[4] << 8) | received_frame[5];
-
+	if (mbFlag == 1){
 		mbFlag = 0;
+		i = 0;
+		//HAL_UART_Abort_IT(&huart1);
+		rx = huart1.Instance->DR; //clear receive buffer
+		huart1.RxState = HAL_UART_STATE_READY;
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-		HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
-		return 1; //check_crc(received_frame);
+
+		if (slave == received_frame[0]) {
+			*type=received_frame[1];
+			*address=(received_frame[2]<<8)|received_frame[3];
+			*data=(received_frame[4]<<8) | received_frame[5];
+			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
+			return 1; //check_crc(received_frame);
+		} else {
+			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
+			return 0;
+		}
 	}
+	
+	if(i>=150) { //if 15 loops = about 1.5 seconds
+		HAL_UART_Abort_IT(&huart1);
+		rx = huart1.Instance->DR; //clear receive buffer
+		huart1.RxState = HAL_UART_STATE_READY;
+		HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
+		i = 0;
+	}
+	i++;
 	return 0;
 }
 
-void MBRespond(int sensor_value) {
-	char frame[7]={6,4,2,0,0,0,0};
+void MBSend(char slave, int address, int value){
+	char frame[8]={slave,6,0,0,0,0,0,0};
 	unsigned short int crc;
 
-	if(sensor_value==0){
-		frame[3]=0;
-		frame[4]=0;
-	} else {
-		frame[3]=0xFF;
-		frame[4]=0xFF;
-	}
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 
-	crc=CRC16(frame,5);
-	frame[5]=crc>>8; //crc to frame
-	frame[6]=crc;
+	frame[2]=address>>8; //address to frame
+	frame[3]=address;
+
+	frame[4]=value>>8;
+	frame[5]=value;
+
+	crc=CRC16(frame,6);
+	frame[6]=crc>>8; //crc to frame
+	frame[7]=crc;
+
+	uartWrite(&huart1, frame, 8);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+}
+
+void MBRespond(char slave, int sensor_value) {
+	char frame[7]={slave,4,2,0,0,0,0};
+	unsigned short int crc;
+
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+
+	frame[3] = sensor_value >> 8; // sensor value to frame
+	frame[4] = sensor_value;
+
+	crc = CRC16(frame, 5);
+	frame[5] = crc >> 8; // crc to frame
+	frame[6] = crc;
 
 	uartWrite(&huart1, frame, 7);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 }
 
 char check_crc(char *received_frame, int len) {

@@ -222,7 +222,7 @@ static void AppTaskStart(void *p_arg)
 		  }
 	  }
 
-	  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	  OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
   }
 }

@@ -212,7 +212,7 @@ static void AppTaskStart(void *p_arg)
     sprintf(lcdstr, "Temperature: %dC ", temp);
     LCD_Write_String(lcdstr);
 
-    OSTimeDlyHMSM(0, 0, 0, 200, OS_OPT_TIME_HMSM_STRICT, &os_err);
+    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
     
     data=MBRequest(1,2);
     //if(data!=-1)
@@ -220,7 +220,7 @@ static void AppTaskStart(void *p_arg)
     LCD_Set_Cursor(2, 1);
     sprintf(lcdstr, "Humidity: %d%% ", hum);
     LCD_Write_String(lcdstr);
-    OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
+    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
     MBSend(2, 1, temp);
     OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);

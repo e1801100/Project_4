@@ -103,8 +103,8 @@ void MBSend(char slave, int address, int value){
 	frame[5]=value;
 
 	crc=CRC16(frame,6);
-	frame[6]=crc>>8; //crc to frame
-	frame[7]=crc;
+	frame[7]=crc>>8; //crc to frame
+	frame[6]=crc;
 
 	uartWrite(&huart1, frame, 8);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);

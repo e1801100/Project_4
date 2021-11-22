@@ -72,7 +72,7 @@ char MBReceive(char slave, char *type, int *address, int *data) {
 			*address=(received_frame[2]<<8)|received_frame[3];
 			*data=(received_frame[4]<<8) | received_frame[5];
 			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
-			return 1; //check_crc(received_frame);
+			return check_crc(received_frame,8);
 		} else {
 			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
 			return 0;
@@ -103,8 +103,8 @@ void MBSend(char slave, int address, int value){
 	frame[5]=value;
 
 	crc=CRC16(frame,6);
-	frame[6]=crc>>8; //crc to frame
-	frame[7]=crc;
+	frame[7]=crc>>8; //crc to frame
+	frame[6]=crc;
 
 	uartWrite(&huart1, frame, 8);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
@@ -130,9 +130,11 @@ void MBRespond(char slave, int sensor_value) {
 char check_crc(char *received_frame, int len) {
 	unsigned short int crc=0;
 
-	crc=*(received_frame+(len-1)); //crc from received frame to variable crc
+	crc=*(received_frame+len-1); //crc from received frame to variable crc
+	//crc=*(received_frame+7);
 	crc=crc<<8;
-	crc|=*(received_frame+(len-2));
+	crc|=*(received_frame+len-2);
+	//crc|=*(received_frame+6);
 
 	if(crc==CRC16(received_frame,len-2)){
 		return 1;

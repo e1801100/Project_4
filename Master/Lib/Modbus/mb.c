@@ -144,7 +144,6 @@ char check_crc(char *received_frame, int len) {
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-    //uartPrint(&huart1, (char *)received_frame);
 	mbFlag = 1;
 }
 

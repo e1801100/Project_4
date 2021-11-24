@@ -1,6 +1,7 @@
 #include "i2c.h"
 #include "bme280.h"
 #include <string.h>
+#include <stdlib.h>
 
 void bme280_start(struct bme280_dev *dev) {
 	//int8_t rslt;
@@ -43,7 +44,7 @@ int8_t i2c_read(uint8_t id, uint8_t reg_addr, uint8_t *data, uint16_t len) {
 void delay_ms(uint32_t period)
 {
     OS_ERR os_err;
-    OSTimeDlyHMSM(0, 0, 0, period, OS_OPT_TIME_HMSM_STRICT, &os_err);
+    HAL_Delay(period);
 }
 
 int8_t i2c_write(uint8_t id, uint8_t reg_addr, uint8_t *data, uint16_t len) {

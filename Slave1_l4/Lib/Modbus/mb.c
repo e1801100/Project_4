@@ -9,9 +9,9 @@ int MBRequest(char slave, int address) {
 	unsigned short int crc;
 	char response[7]={0}, c;
 	int value=0, i=0;
-	OS_ERR os_err;
+	//OS_ERR os_err;
 
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 1);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
 
 	frame[2]=address>>8; //address to frame
 	frame[3]=address;
@@ -22,7 +22,7 @@ int MBRequest(char slave, int address) {
 
 	uartWrite(&huart1, frame, 8);
 
-	OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	//OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)response, 7);
 	for (i = 0; i < 100; i++) {
 		if(mbFlag==1) {
@@ -30,10 +30,11 @@ int MBRequest(char slave, int address) {
 			mbFlag = 0;
 		} else if (i == 99) {
 			HAL_UART_Abort_IT(&huart1);
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 0);
+			HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 			return -1;
 		}
-		OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		HAL_Delay(10);
+		//OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
 	}
 	if (response[0]==slave && response[1]==4 && response[2]==2) {
 		//sensor value from frame
@@ -48,7 +49,7 @@ int MBRequest(char slave, int address) {
 		response[2], value, response[5],response[6]);
     LCD_Write_String(lcdstr);*/
 	
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 0);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 	return value;
 }
 
@@ -61,18 +62,20 @@ char MBReceive(char slave, char *type, int *address, int *data) {
 
 	if (mbFlag == 1){
 		mbFlag = 0;
-		i = 0;
-		//HAL_UART_Abort_IT(&huart1);
-		//rx = huart1.Instance->DR; //clear receive buffer
-		huart1.RxState = HAL_UART_STATE_READY;
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 0);
+		HAL_UART_Abort_IT(&huart1);
+		//rx = huart1.Instance->RDR; //clear receive buffer
+		//huart1.RxState = HAL_UART_STATE_READY;
+		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+		/*HAL_UART_Receive(&huart1, (uint8_t*)received_frame, 8,1000);
+		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);*/
 
 		if (slave == received_frame[0]) {
 			*type=received_frame[1];
 			*address=(received_frame[2]<<8)|received_frame[3];
 			*data=(received_frame[4]<<8) | received_frame[5];
 			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
-			return 1; //check_crc(received_frame, 8);
+			i = 0;
+			return 1; //check_crc(received_frame,8);
 		} else {
 			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
 			return 0;
@@ -81,8 +84,8 @@ char MBReceive(char slave, char *type, int *address, int *data) {
 	
 	if(i>=150) { //if 15 loops = about 1.5 seconds
 		HAL_UART_Abort_IT(&huart1);
-		rx = huart1.Instance->RDR; //clear receive buffer
-		huart1.RxState = HAL_UART_STATE_READY;
+		//rx = huart1.Instance->RDR; //clear receive buffer
+		//huart1.RxState = HAL_UART_STATE_READY;
 		HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
 		i = 0;
 	}
@@ -94,7 +97,7 @@ void MBSend(char slave, int address, int value){
 	char frame[8]={slave,6,0,0,0,0,0,0};
 	unsigned short int crc;
 
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
 
 	frame[2]=address>>8; //address to frame
 	frame[3]=address;
@@ -107,14 +110,14 @@ void MBSend(char slave, int address, int value){
 	frame[6]=crc;
 
 	uartWrite(&huart1, frame, 8);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 }
 
 void MBRespond(char slave, int sensor_value) {
 	char frame[7]={slave,4,2,0,0,0,0};
 	unsigned short int crc;
 
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 1);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
 
 	frame[3] = sensor_value >> 8; // sensor value to frame
 	frame[4] = sensor_value;
@@ -124,7 +127,7 @@ void MBRespond(char slave, int sensor_value) {
 	frame[6] = crc;
 
 	uartWrite(&huart1, frame, 7);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 0);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 }
 
 char check_crc(char *received_frame, int len) {
@@ -145,8 +148,7 @@ char check_crc(char *received_frame, int len) {
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 1);
-    //uartPrint(&huart1, (char *)received_frame);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
 	mbFlag = 1;
 }
 

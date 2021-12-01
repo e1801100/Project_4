@@ -1,13 +1,13 @@
 #include <main.h>
 //#include <mb.h>
 
-char mbFlag=0;
+static char mbFlag=0;
 char received_frame[8] = {6, 1, 0, 3, 4, 5, 6, 7};
 
 int MBRequest(char slave, int address) {
 	char frame[8]={slave,4,0,0,0,1,0,0};
 	unsigned short int crc;
-	char response[7]={0}, c;
+	char response[7]={0}, rx;
 	int value=0, i=0;
 	OS_ERR os_err;
 
@@ -22,7 +22,7 @@ int MBRequest(char slave, int address) {
 
 	uartWrite(&huart1, frame, 8);
 
-	OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	//OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)response, 7);
 	for (i = 0; i < 100; i++) {
 		if(mbFlag==1) {
@@ -30,6 +30,8 @@ int MBRequest(char slave, int address) {
 			mbFlag = 0;
 		} else if (i == 99) {
 			HAL_UART_Abort_IT(&huart1);
+			rx = huart1.Instance->DR; //clear receive buffer
+			huart1.RxState = HAL_UART_STATE_READY;
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 			return -1;
 		}

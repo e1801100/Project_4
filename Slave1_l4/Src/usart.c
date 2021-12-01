@@ -221,7 +221,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 void uartWrite(UART_HandleTypeDef *huart, char _out[], int len){
   //MAX3485 to transmit mode
   HAL_GPIO_WritePin(GPIOA, MAX_PIN, 1);
-  HAL_Delay(2);
+  HAL_Delay(5);
   HAL_UART_Transmit(huart, (uint8_t *)_out, len, 32);
   HAL_Delay(5);
 

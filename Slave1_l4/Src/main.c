@@ -219,6 +219,7 @@ static void AppTaskStart(void *p_arg) {
 		
 		if (MBReceive(1, &type, &address, &data)) {
 			//MBRespond(1, (int)temp);
+			HAL_Delay(10);
 			if (type == 4) {
 				if (address == 1 && data == 1) {
 					MBRespond(1, (int)temp); //send temperature
@@ -227,7 +228,7 @@ static void AppTaskStart(void *p_arg) {
 				}
 			}
 		}
-		HAL_Delay(100);
+		HAL_Delay(10);
 	}
 }
 /* USER CODE END 4 */

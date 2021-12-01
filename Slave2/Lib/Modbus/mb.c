@@ -61,10 +61,10 @@ char MBReceive(char slave, char *type, int *address, int *data) {
 
 	if (mbFlag == 1){
 		mbFlag = 0;
-		i = 0;
+		
 		//HAL_UART_Abort_IT(&huart1);
-		rx = huart1.Instance->DR; //clear receive buffer
-		huart1.RxState = HAL_UART_STATE_READY;
+		//rx = huart1.Instance->DR; //clear receive buffer
+		//huart1.RxState = HAL_UART_STATE_READY;
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 
 		if (slave == received_frame[0]) {
@@ -72,14 +72,18 @@ char MBReceive(char slave, char *type, int *address, int *data) {
 			*address=(received_frame[2]<<8)|received_frame[3];
 			*data=(received_frame[4]<<8) | received_frame[5];
 			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
+			i = 0;
 			return 1; //check_crc(received_frame);
 		} else {
+			HAL_UART_Abort_IT(&huart1);
+			rx = huart1.Instance->DR; //clear receive buffer
+			huart1.RxState = HAL_UART_STATE_READY;
 			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
 			return 0;
 		}
 	}
 	
-	if(i>=150) { //if 15 loops = about 1.5 seconds
+	if(i>=1000) { //if 15 loops = about 1.5 seconds
 		HAL_UART_Abort_IT(&huart1);
 		rx = huart1.Instance->DR; //clear receive buffer
 		huart1.RxState = HAL_UART_STATE_READY;

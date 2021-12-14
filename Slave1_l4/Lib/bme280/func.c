@@ -3,6 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+/**
+  * @brief  Initialize bme280 sensor
+  * @retval None
+  */
 void bme280_start(struct bme280_dev *dev) {
 	//int8_t rslt;
 
@@ -16,6 +20,10 @@ void bme280_start(struct bme280_dev *dev) {
 	dev->settings.filter = BME280_FILTER_COEFF_16;
 	bme280_set_sensor_settings(BME280_OSR_PRESS_SEL | BME280_OSR_TEMP_SEL | BME280_OSR_HUM_SEL | BME280_FILTER_SEL, dev);
 }
+/**
+  * @brief  Read temperature and humidity from bme280 sensor
+  * @retval 1 if successful, 0 if not
+  */
 int8_t bme280_read(float *temperature, float *humidity, struct bme280_dev *dev)
  {
 	int8_t rslt;

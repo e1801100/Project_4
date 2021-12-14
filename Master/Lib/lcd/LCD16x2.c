@@ -9,6 +9,9 @@
  * Visit Website: www.DeepBlueMbedded.com
  *
  */
+/*! @file LCD16x2.c
+    @brief LCD library
+    @defgroup LCD */
 
 #include "LCD16x2.h"
 #include "LCD16x2_cfg.h"
@@ -48,12 +51,22 @@ void LCD_CMD(unsigned char a_CMD)
     HAL_GPIO_WritePin(LCD16x2_CfgParam.LCD_GPIO, LCD16x2_CfgParam.EN_PIN, 0);
     DWT_Delay_us(LCD16x2_CfgParam.LCD_EN_Delay);
 }
+
+/**
+  * @brief  Clear LCD
+  * @retval None
+  */
 void LCD_Clear()
 {
     LCD_CMD(0);
     LCD_CMD(1);
     DWT_Delay_us(70);
 }
+
+/**
+  * @brief  Move cursor to position on LCD
+  * @retval None
+  */
 void LCD_Set_Cursor(unsigned char r, unsigned char c)
 {
     unsigned char Temp,Low4,High4;
@@ -75,6 +88,11 @@ void LCD_Set_Cursor(unsigned char r, unsigned char c)
     }
     DWT_Delay_ms(2);
 }
+
+/**
+  * @brief  Initialize LCD
+  * @retval None
+  */
 void LCD_Init()
 {
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -123,6 +141,11 @@ void LCD_Init()
     LCD_CMD(0x00);
     LCD_CMD(0x01);
 }
+
+/**
+  * @brief  Write 1 character to LCD
+  * @retval None
+  */
 void LCD_Write_Char(char Data)
 {
    char Low4,High4;
@@ -143,18 +166,33 @@ void LCD_Write_Char(char Data)
    HAL_GPIO_WritePin(LCD16x2_CfgParam.LCD_GPIO, LCD16x2_CfgParam.EN_PIN, 0);
    DWT_Delay_us(LCD16x2_CfgParam.LCD_EN_Delay);
 }
+
+/**
+  * @brief  Write string to LCD
+  * @retval None
+  */
 void LCD_Write_String(char *str)
 {
     int i;
     for(i=0;str[i]!='\0';i++)
        LCD_Write_Char(str[i]);
 }
+
+/**
+  * @brief  Move text left on LCD
+  * @retval None
+  */
 void LCD_SL()
 {
     LCD_CMD(0x01);
     LCD_CMD(0x08);
     DWT_Delay_us(35);
 }
+
+/**
+  * @brief  Move text right on LCD
+  * @retval None
+  */
 void LCD_SR()
 {
     LCD_CMD(0x01);

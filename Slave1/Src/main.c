@@ -201,10 +201,6 @@ static void AppTaskStart(void *p_arg)
 	struct bme280_dev dev;
 	bme280_start(&dev);
 
-	//char send[20];
-	/*BH1750_init_i2c(&hi2c2);
-	BH1750_device_t* test_dev = BH1750_init_dev_struct(&hi2c2, "test device", true);
-	BH1750_init_dev(test_dev);*/
 	char type;
 	int address, data;
 	float temp, hum;

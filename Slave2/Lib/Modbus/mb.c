@@ -1,13 +1,22 @@
+/*! @file mb.c
+    @brief Modbus library
+	 @defgroup MODBUS */
+
 #include <main.h>
 //#include <mb.h>
 
-char mbFlag=0;
-static char received_frame[8] = {6, 1, 0, 3, 4, 5, 6, 7};
+static char mbFlag=0;
+char received_frame[8] = {6, 1, 0, 3, 4, 5, 6, 7};
+UART_HandleTypeDef *uart;
 
+/**
+  * @brief  Request data using modbus from slave
+  * @retval Returns value sent by slave as response, or -1 if not successful
+  */
 int MBRequest(char slave, int address) {
 	char frame[8]={slave,4,0,0,0,1,0,0};
 	unsigned short int crc;
-	char response[7]={0}, c;
+	char response[7]={0}, rx;
 	int value=0, i=0;
 	OS_ERR os_err;
 
@@ -20,16 +29,19 @@ int MBRequest(char slave, int address) {
 	frame[7]=crc>>8; //crc to frame
 	frame[6]=crc;
 
-	uartWrite(&huart1, frame, 8);
+	uartWrite(uart, frame, 8);
 
-	OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
-	HAL_UART_Receive_IT(&huart1, (uint8_t *)response, 7);
+	//OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	HAL_UART_Receive_IT(uart, (uint8_t *)response, 7);
+	
 	for (i = 0; i < 100; i++) {
 		if(mbFlag==1) {
 			i = 100;
 			mbFlag = 0;
 		} else if (i == 99) {
-			HAL_UART_Abort_IT(&huart1);
+			HAL_UART_Abort_IT(uart);
+			rx = huart1.Instance->DR; //clear receive buffer
+			huart1.RxState = HAL_UART_STATE_READY;
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 			return -1;
 		}
@@ -52,48 +64,65 @@ int MBRequest(char slave, int address) {
 	return value;
 }
 
-void MBInitSlave() {
-	HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
+/**
+  * @brief  Initialize modbus slave
+  * @retval None
+  */
+void MBInitSlave(UART_HandleTypeDef *huart) {
+	uart = huart;
+	HAL_UART_Receive_IT(uart, (uint8_t *)received_frame, 8);
 }
+/**
+  * @brief  Initialize modbus master
+  * @retval None
+  */
+void MBInitMaster(UART_HandleTypeDef *huart) {
+	uart = huart;
+}
+
+/**
+  * @brief  Check if modbus frame received
+  * @retval 1 if valid data received, 0 otherwise
+  */
 char MBReceive(char slave, char *type, int *address, int *data) {
 	int rx;
 	static int i = 0;
 
 	if (mbFlag == 1){
 		mbFlag = 0;
-		
-		//HAL_UART_Abort_IT(&huart1);
-		//rx = huart1.Instance->DR; //clear receive buffer
-		//huart1.RxState = HAL_UART_STATE_READY;
+		i = 0;
+		//HAL_UART_Abort_IT(uart);
+		rx = uart->Instance->DR; //clear receive buffer
+		uart->RxState = HAL_UART_STATE_READY;
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 
 		if (slave == received_frame[0]) {
 			*type=received_frame[1];
 			*address=(received_frame[2]<<8)|received_frame[3];
 			*data=(received_frame[4]<<8) | received_frame[5];
-			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
-			i = 0;
+			HAL_UART_Receive_IT(uart, (uint8_t *)received_frame, 8);
 			return 1; //check_crc(received_frame);
 		} else {
-			HAL_UART_Abort_IT(&huart1);
-			rx = huart1.Instance->DR; //clear receive buffer
-			huart1.RxState = HAL_UART_STATE_READY;
-			HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
+			HAL_UART_Receive_IT(uart, (uint8_t *)received_frame, 8);
 			return 0;
 		}
 	}
 	
-	if(i>=1000) { //if 15 loops = about 1.5 seconds
-		HAL_UART_Abort_IT(&huart1);
-		rx = huart1.Instance->DR; //clear receive buffer
-		huart1.RxState = HAL_UART_STATE_READY;
-		HAL_UART_Receive_IT(&huart1, (uint8_t *)received_frame, 8);
+	if(i>=150) { //if 15 loops = about 1.5 seconds
+		HAL_UART_Abort_IT(uart);
+		rx = uart->Instance->DR; //clear receive buffer
+		uart->RxState = HAL_UART_STATE_READY;
+		HAL_UART_Receive_IT(uart, (uint8_t *)received_frame, 8);
 		i = 0;
 	}
 	i++;
 	return 0;
 }
 
+/**
+  * @brief  Send data to modbus slave
+  * @retval None
+  */
 void MBSend(char slave, int address, int value){
 	char frame[8]={slave,6,0,0,0,0,0,0};
 	unsigned short int crc;
@@ -107,13 +136,17 @@ void MBSend(char slave, int address, int value){
 	frame[5]=value;
 
 	crc=CRC16(frame,6);
-	frame[6]=crc>>8; //crc to frame
-	frame[7]=crc;
+	frame[7]=crc>>8; //crc to frame
+	frame[6]=crc;
 
-	uartWrite(&huart1, frame, 8);
+	uartWrite(uart, frame, 8);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 }
 
+/**
+  * @brief  Respond to request from modbus master
+  * @retval None
+  */
 void MBRespond(char slave, int sensor_value) {
 	char frame[7]={slave,4,2,0,0,0,0};
 	unsigned short int crc;
@@ -127,10 +160,14 @@ void MBRespond(char slave, int sensor_value) {
 	frame[5] = crc >> 8; // crc to frame
 	frame[6] = crc;
 
-	uartWrite(&huart1, frame, 7);
+	uartWrite(uart, frame, 7);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 }
 
+/**
+  * @brief  Check for valid CRC on modbus frame
+  * @retval 1 if valid, 0 if not
+  */
 char check_crc(char *received_frame, int len) {
 	unsigned short int crc=0;
 
@@ -148,7 +185,6 @@ char check_crc(char *received_frame, int len) {
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-    //uartPrint(&huart1, (char *)received_frame);
 	mbFlag = 1;
 }
 

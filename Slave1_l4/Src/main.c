@@ -195,6 +195,10 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+/**
+  * @brief  Main task
+  * @retval None
+  */
 static void AppTaskStart(void *p_arg) {
 	OS_ERR os_err;
 	char type;

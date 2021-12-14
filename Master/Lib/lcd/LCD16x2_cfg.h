@@ -9,6 +9,9 @@
  * Visit Website: www.DeepBlueMbedded.com
  *
  */
+/*! @file LCD16x2_cfg.h
+    @brief LCD library configuration
+	 @defgroup LCD */
 
 #ifndef LCD16X2_CFG_H_
 #define LCD16X2_CFG_H_

@@ -10,6 +10,9 @@
  * Visit Website: www.DeepBlueMbedded.com
  *
  */
+/*! @file LCD16x2.h
+    @brief LCD library header
+	 @defgroup LCD */
 
 #ifndef LCD16X2_H_
 #define LCD16X2_H_

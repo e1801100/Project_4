@@ -1,3 +1,7 @@
+/*! @file mb.h
+    @brief Modbus library header
+	 @defgroup MODBUS */
+
 #ifndef __MB_H
 #define __MB_H
 

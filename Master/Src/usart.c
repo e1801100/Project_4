@@ -115,6 +115,10 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+/**
+  * @brief  Write data to uart
+  * @retval None
+  */
 void uartWrite(UART_HandleTypeDef *huart, char _out[], int len){
   OS_ERR os_err;
   

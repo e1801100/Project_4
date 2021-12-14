@@ -186,51 +186,12 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+/**
+  * @brief  Main task
+  * @retval None
+  */
 static void AppTaskStart(void *p_arg)
 {
-<<<<<<< HEAD
-	OS_ERR os_err;
-
-	HAL_Init();
-	SystemClock_Config();
-	MX_GPIO_Init();
-	MX_USART1_UART_Init();
-	//HAL_UART_MspInit(&huart1);
-
-	//Modbus initialization
-	MBInitMaster(&huart1);
-
-	int data, temp = 1, hum = 2;
-	//char received_frame[8]={6,1,2,3,4,5,6,7};
-	char lcdstr[20];
-	//uartPrint(&huart1, received_frame);
-	while (DEF_TRUE) {
-		data = MBRequest(1, 1);
-		//if(data!=-1)
-		temp = data;
-		LCD_Set_Cursor(1, 1);
-		sprintf(lcdstr, "Temperature: %dC ", temp);
-		LCD_Write_String(lcdstr);
-
-		OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
-
-		data = MBRequest(1, 2);
-		//if(data!=-1)
-		hum = data;
-		LCD_Set_Cursor(2, 1);
-		sprintf(lcdstr, "Humidity: %d%% ", hum);
-		LCD_Write_String(lcdstr);
-		OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
-
-		MBSend(2, 1, temp);
-		OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
-		MBSend(2, 2, hum);
-
-		OSTimeDlyHMSM(0, 0, 1, 0, OS_OPT_TIME_HMSM_STRICT, &os_err);
-
-		//OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
-	}
-=======
   OS_ERR os_err;
 
   HAL_Init();
@@ -240,7 +201,7 @@ static void AppTaskStart(void *p_arg)
   //HAL_UART_MspInit(&huart1);
 
   //Modbus initialization
-  //MBInitSlave();
+  MBInitMaster(&huart1);
 
   int data, temp=1, hum=2;
   //char received_frame[8]={6,1,2,3,4,5,6,7};
@@ -248,32 +209,31 @@ static void AppTaskStart(void *p_arg)
   //uartPrint(&huart1, received_frame);
   while (DEF_TRUE)
   {
-	  data=MBRequest(1,1);
-    if(data!=-1)
-    temp=data;
-    LCD_Set_Cursor(1, 1);
-    sprintf(lcdstr, "Temperature: %dC ", temp);
-    LCD_Write_String(lcdstr);
+	  data = MBRequest(1, 1);
+	  if (data != -1)
+		  temp = data;
+	  LCD_Set_Cursor(1, 1);
+	  sprintf(lcdstr, "Temperature: %dC ", temp);
+	  LCD_Write_String(lcdstr);
 
-    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
-    
-    data=MBRequest(1,2);
-    if(data!=-1)
-    hum=data;
-    LCD_Set_Cursor(2, 1);
-    sprintf(lcdstr, "Humidity: %d%% ", hum);
-    LCD_Write_String(lcdstr);
-    OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &os_err);
-    
-    MBSend(2, 1, temp);
-    OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
-    MBSend(2, 2, hum);
+	  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
+
+	  data = MBRequest(1, 2);
+	  if (data != -1)
+		  hum = data;
+	  LCD_Set_Cursor(2, 1);
+	  sprintf(lcdstr, "Humidity: %d%% ", hum);
+	  LCD_Write_String(lcdstr);
+	  OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &os_err);
+
+	  MBSend(2, 1, temp);
+	  OSTimeDlyHMSM(0, 0, 0, 100, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	  MBSend(2, 2, hum);
 
 	  OSTimeDlyHMSM(0, 0, 0, 500, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
 	  //OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
   }
->>>>>>> ceaf150dde34169849b8210e645287431d1ff78e
 }
 
 static void LCDtask(void *p_arg)

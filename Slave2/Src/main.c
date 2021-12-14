@@ -186,6 +186,10 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+/**
+  * @brief  Main task
+  * @retval None
+  */
 static void AppTaskStart(void *p_arg)
 {
   OS_ERR os_err;
@@ -197,7 +201,7 @@ static void AppTaskStart(void *p_arg)
   //HAL_UART_MspInit(&huart1);
 
   //Modbus initialization
-  MBInitSlave();
+  MBInitSlave(&huart1);
 
   //int temp, hum;
   //char received_frame[8]={6,1,2,3,4,5,6,7};

@@ -1,9 +1,17 @@
+/*! @file mb.c
+    @brief Modbus library
+	 @defgroup MODBUS */
+
 #include <main.h>
 //#include <mb.h>
 
 char mbFlag=0;
 static char received_frame[8] = {6, 1, 0, 3, 4, 5, 6, 7};
 
+/**
+  * @brief  Request data using modbus from slave
+  * @retval Returns value sent by slave as response, or -1 if not successful
+  */
 int MBRequest(char slave, int address) {
 	char frame[8]={slave,4,0,0,0,1,0,0};
 	unsigned short int crc;
@@ -53,9 +61,18 @@ int MBRequest(char slave, int address) {
 	return value;
 }
 
+/**
+  * @brief  Initialize modbus slave
+  * @retval None
+  */
 void MBInitSlave() {
 	HAL_UART_Receive_IT(&huart1, (uint8_t*)received_frame, 8);
 }
+
+/**
+  * @brief  Check if modbus frame received
+  * @retval 1 if valid data received, 0 otherwise
+  */
 char MBReceive(char slave, char *type, int *address, int *data) {
 	int rx;
 	static int i = 0;
@@ -93,6 +110,10 @@ char MBReceive(char slave, char *type, int *address, int *data) {
 	return 0;
 }
 
+/**
+  * @brief  Send data to modbus slave
+  * @retval None
+  */
 void MBSend(char slave, int address, int value){
 	char frame[8]={slave,6,0,0,0,0,0,0};
 	unsigned short int crc;
@@ -113,6 +134,10 @@ void MBSend(char slave, int address, int value){
 	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 }
 
+/**
+  * @brief  Respond to request from modbus master
+  * @retval None
+  */
 void MBRespond(char slave, int sensor_value) {
 	char frame[7]={slave,4,2,0,0,0,0};
 	unsigned short int crc;
@@ -130,6 +155,10 @@ void MBRespond(char slave, int sensor_value) {
 	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 }
 
+/**
+  * @brief  Check for valid CRC on modbus frame
+  * @retval 1 if valid, 0 if not
+  */
 char check_crc(char *received_frame, int len) {
 	unsigned short int crc=0;
 
@@ -146,6 +175,10 @@ char check_crc(char *received_frame, int len) {
 	}
 }
 
+/**
+  * @brief  Function that runs on uart interrupt
+  * @retval None
+  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);

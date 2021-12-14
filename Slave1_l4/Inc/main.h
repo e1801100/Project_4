@@ -32,11 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
+#include <os.h>
 #include <cpu.h>
 #include <lib_def.h>
 #include <lib_ascii.h>
@@ -45,14 +41,12 @@ extern "C" {
 #include <lib_str.h>
 #include <app_cfg.h>
 #include <os_cfg_app.h>
-#include <os.h>
 
 #include "mb.h"
 #include "gpio.h"
 #include "usart.h"
 #include "i2c.h"
 #include "bme280.h"
-#include "BH1750.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -91,7 +85,8 @@ void Error_Handler(void);
 #define LD3_Pin GPIO_PIN_3
 #define LD3_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+#define LED_Pin GPIO_PIN_3
+#define LED_GPIO_Port GPIOB
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

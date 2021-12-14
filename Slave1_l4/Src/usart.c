@@ -21,7 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-
+#define MAX_PIN GPIO_PIN_8
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -33,7 +33,7 @@ void MX_USART1_UART_Init(void)
 {
 
   /* USER CODE BEGIN USART1_Init 0 */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
+  HAL_GPIO_WritePin(GPIOA, MAX_PIN, 0);
   /* USER CODE END USART1_Init 0 */
 
   /* USER CODE BEGIN USART1_Init 1 */
@@ -71,7 +71,7 @@ void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -219,17 +219,14 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 /* USER CODE BEGIN 1 */
 void uartWrite(UART_HandleTypeDef *huart, char _out[], int len){
-  OS_ERR os_err;
-  
   //MAX3485 to transmit mode
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
-  
-  OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
+  HAL_GPIO_WritePin(GPIOA, MAX_PIN, 1);
+  HAL_Delay(5);
   HAL_UART_Transmit(huart, (uint8_t *)_out, len, 32);
-  OSTimeDlyHMSM(0, 0, 0, 10, OS_OPT_TIME_HMSM_STRICT, &os_err);
+  HAL_Delay(5);
 
   //MAX3485 to receive mode
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
+  HAL_GPIO_WritePin(GPIOA, MAX_PIN, 0);
   
 } 
 /* USER CODE END 1 */

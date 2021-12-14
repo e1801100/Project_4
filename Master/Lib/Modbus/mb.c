@@ -1,14 +1,14 @@
 #include <main.h>
 //#include <mb.h>
 
-char mbFlag=0;
+static char mbFlag=0;
 char received_frame[8] = {6, 1, 0, 3, 4, 5, 6, 7};
 UART_HandleTypeDef *uart;
 
 int MBRequest(char slave, int address) {
 	char frame[8]={slave,4,0,0,0,1,0,0};
 	unsigned short int crc;
-	char response[7]={0}, c;
+	char response[7]={0}, rx;
 	int value=0, i=0;
 	OS_ERR os_err;
 
@@ -23,14 +23,17 @@ int MBRequest(char slave, int address) {
 
 	uartWrite(uart, frame, 8);
 
-	OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
+	//OSTimeDlyHMSM(0, 0, 0, 5, OS_OPT_TIME_HMSM_STRICT, &os_err);
 	HAL_UART_Receive_IT(uart, (uint8_t *)response, 7);
+	
 	for (i = 0; i < 100; i++) {
 		if(mbFlag==1) {
 			i = 100;
 			mbFlag = 0;
 		} else if (i == 99) {
 			HAL_UART_Abort_IT(uart);
+			rx = huart1.Instance->DR; //clear receive buffer
+			huart1.RxState = HAL_UART_STATE_READY;
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 			return -1;
 		}
@@ -150,7 +153,10 @@ char check_crc(char *received_frame, int len) {
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+<<<<<<< HEAD
     //uartPrint(uart, (char *)received_frame);
+=======
+>>>>>>> ceaf150dde34169849b8210e645287431d1ff78e
 	mbFlag = 1;
 }
 
